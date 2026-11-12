@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a3b5d">
+<title>Paripaalan Dashboard</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Paripaalan">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  html, body { margin: 0; height: 100%; background: #1a3b5d; overflow: hidden; font-family: "Segoe UI", Roboto, Arial, sans-serif; }
+  #frame { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; background: #f3f5f8;
+           padding-top: env(safe-area-inset-top); box-sizing: border-box; }
+  #splash { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: #1a3b5d; color: #fff; z-index: 2; transition: opacity .3s; text-align: center; padding: 24px; }
+  #splash img { width: 150px; height: 150px; object-fit: contain; margin-bottom: 18px; }
+  #splash .t { font-size: 1.3rem; font-weight: 600; }
+  #splash .s { font-size: .85rem; color: #cfe0f0; margin-top: 6px; }
+  #splash.gone { opacity: 0; pointer-events: none; }
+  #msg { position: fixed; left: 12px; right: 12px; bottom: 14px; z-index: 3; background: #b42318; color: #fff; border-radius: 8px;
+         padding: 10px 14px; font-size: .9rem; display: none; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
+  #msg button { background: #fff; color: #b42318; border: 0; border-radius: 5px; padding: 5px 10px; margin-left: 8px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div id="splash">
+  <img src="icons/emblem.png" alt="">
+  <div class="t">Paripaalan</div>
+  <div class="s" id="splashText">Staff &amp; Vacancy Dashboard &middot; loading&hellip;</div>
+</div>
+<iframe id="frame" title="Paripaalan Dashboard" allow="clipboard-write" referrerpolicy="origin"></iframe>
+<div id="msg"></div>
+
+<script src="app-config.js"></script>
+<script>
+(function () {
+  "use strict";
+  // This page is the installable app. It shows the Google Apps Script
+  // dashboard in a frame, and keeps the sign-in here (the dashboard sends
+  // it over - see Index.html's setToken), because an installed app's own
+  // storage is kept by the phone while the Google frame's is not.
+  var KEY = "paripaalan_dashboard_token";
+  var url = (window.PARIPAALAN_DASHBOARD_URL || "").trim();
+  var frame = document.getElementById("frame"), splash = document.getElementById("splash"), msg = document.getElementById("msg");
+
+  function token() { try { var t = localStorage.getItem(KEY) || ""; return /^[a-f0-9]{64}$/.test(t) ? t : ""; } catch (e) { return ""; } }
+  function note(html) { msg.innerHTML = html; msg.style.display = "block"; }
+
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(url)) {
+    document.getElementById("splashText").textContent = "Not set up yet: put the dashboard's /exec link in app-config.js.";
+    return;
+  }
+
+  window.addEventListener("message", function (ev) {
+    // Only the Apps Script frame (served from *.googleusercontent.com).
+    if (!/^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*\.googleusercontent\.com$/.test(ev.origin)) return;
+    var d = ev.data;
+    if (!d || d.type !== "paripaalan-dashboard-token") return;
+    try {
+      if (d.token && /^[a-f0-9]{64}$/.test(d.token)) localStorage.setItem(KEY, d.token);
+      else localStorage.removeItem(KEY);
+    } catch (e) {}
+  });
+
+  var t = token();
+  frame.src = url + (t ? "?k=" + t : "");
+  frame.addEventListener("load", function () { splash.classList.add("gone"); });
+  setTimeout(function () { splash.classList.add("gone"); }, 12000);
+
+  function offline() { note('No internet connection. <button type="button" onclick="location.reload()">Retry</button>'); }
+  window.addEventListener("offline", offline);
+  window.addEventListener("online", function () { msg.style.display = "none"; });
+  if (!navigator.onLine) offline();
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+  }
+})();
+</script>
+</body>
+</html>

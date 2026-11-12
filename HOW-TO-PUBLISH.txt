@@ -1,0 +1,85 @@
+PARIPAALAN DASHBOARD AS AN INSTALLABLE PHONE APP
+================================================
+
+Why this is needed
+------------------
+The Google dashboard link (script.google.com/.../exec) can't be installed
+as an app: the page Chrome sees belongs to Google, and Google doesn't let
+it carry an app name/icon. This folder is a small page of our own that
+CAN be installed (Paripaalan emblem as the icon, opens full-screen) and
+shows the Google dashboard inside itself. It holds no staff data - the
+data still comes only from the Google dashboard, after the usual sign-in.
+
+It is published free on GitHub Pages. About 15 minutes, once.
+
+
+STEP 1 - Update the dashboard script (Apps Script)
+--------------------------------------------------
+1. Open the Sheet > Extensions > Apps Script.
+2. Replace ALL of Code.gs with google_dashboard\Code.gs, and ALL of
+   Index with google_dashboard\Index.html. Save.
+3. Deploy > Manage deployments > pencil (Edit) > Version: New version >
+   Deploy. The /exec link stays the same. Copy it (Web app URL).
+
+
+STEP 2 - Put the app page on GitHub Pages
+-----------------------------------------
+1. Sign in at https://github.com (create a free account if needed -
+   an office account/email is better than a personal one). Note the
+   username, e.g. esicmchhyd.
+2. Top right "+" > New repository.
+     Repository name:  paripaalan-dashboard
+     Public
+   > Create repository.
+3. On the new repository page click "uploading an existing file".
+   Drag in EVERYTHING from this folder
+   (D:\Paripaalan-Web\python_app\google_dashboard\app):
+     index.html, app-config.js, manifest.webmanifest, sw.js,
+     and the "icons" folder (drag the folder itself).
+   (This HOW-TO file can be left out.) > Commit changes.
+4. Click app-config.js > pencil (Edit). Replace
+     PASTE-THE-/exec-LINK-HERE
+   with the /exec link from Step 1 (keep the quotes). > Commit changes.
+5. Settings (top of the repository) > Pages (left) >
+     Source: Deploy from a branch;  Branch: main  /(root)  > Save.
+   After a minute the page shows "Your site is live at
+     https://esicmchhyd.github.io/paripaalan-dashboard/"
+   That is the app's address.
+
+
+STEP 3 - Allow the app page to show the dashboard
+-------------------------------------------------
+Apps Script > Project Settings (gear) > Script properties > Add:
+     Property:  APP_PAGE_ORIGIN
+     Value:     https://esicmchhyd.github.io
+               (your username; ONLY up to .io - no /paripaalan-dashboard,
+                no slash at the end)
+Save. No new deployment is needed for this.
+Without it the app shows "script.google.com refused to connect".
+
+
+STEP 4 - Install on phones
+--------------------------
+Android (Chrome): open https://esicmchhyd.github.io/paripaalan-dashboard/
+   > menu (three dots) > "Install app" (or "Add to Home screen" > Install).
+iPhone (Safari): open the same address > Share > "Add to Home Screen".
+Sign in once with the approved email. The app remembers the sign-in
+(it stays signed in while it is opened at least once every 7 days).
+Remove the old dashboard shortcut from the Home Screen, if any.
+
+Share this app address with staff instead of the /exec link. Who may
+see data is still controlled only by the "Allowed Users" tab.
+
+
+LATER
+-----
+- New emblem: copy the new icons (Paripaalan > assets\logos\icons\*.png,
+  and a small emblem.png) into the repository's icons folder, and in
+  sw.js change  VERSION = "pd-app-1"  to "pd-app-2" (and so on). Phones
+  pick it up the next time the app is opened online; the Home Screen
+  icon itself only changes if the app is removed and installed again.
+- New /exec link (only if a NEW deployment is made instead of a new
+  version): edit app-config.js on GitHub.
+- iPhone: if the dashboard inside the app ever shows a Google error,
+  Safari is blocking Google's frame - use the plain /exec link in Safari
+  (Share > Add to Home Screen) on that phone instead.
